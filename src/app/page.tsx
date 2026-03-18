@@ -1,80 +1,100 @@
-import Link from "next/link";
+import PropertyAssistant from "@/components/PropertyAssistant";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-white">
-      <header className="border-b">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <h1 className="text-xl font-bold">AbujaVerifiedHomes</h1>
+    <main className="bg-white text-gray-900">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-b from-green-50 to-white px-6 py-16">
+        <div className="mx-auto max-w-6xl">
+          <div className="max-w-3xl">
+            <p className="mb-3 inline-block rounded-full bg-green-100 px-4 py-1 text-sm font-medium text-green-800">
+              Abuja Property • Smart Homes • Due Diligence
+            </p>
 
-          <nav className="flex gap-4 text-sm">
-            <Link href="/" className="hover:underline">
-              Home
-            </Link>
-            <Link href="/listings" className="hover:underline">
-              Listings
-            </Link>
-            <Link href="/due-diligence" className="hover:underline">
-              Due Diligence
-            </Link>
-            <Link href="/admin" className="hover:underline">
-              Admin
-            </Link>
-          </nav>
-        </div>
-      </header>
+            <h1 className="text-4xl font-bold leading-tight md:text-6xl">
+              Buy Property in Abuja with More Confidence
+            </h1>
 
-      <section className="mx-auto max-w-6xl px-6 py-16">
-        <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
-          Verified Abuja property marketplace
-        </p>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-600">
+              Explore verified property opportunities, ask smart questions
+              before you invest, and get guidance on documentation, inspection,
+              smart homes, and property planning in Abuja.
+            </p>
 
-        <h2 className="max-w-3xl text-4xl font-bold leading-tight md:text-5xl">
-          Buy Abuja property with confidence from anywhere in the world.
-        </h2>
+            <div className="mt-8 flex flex-wrap gap-4">
+              <a
+                href="/listings"
+                className="rounded-xl bg-green-700 px-6 py-3 font-semibold text-white hover:bg-green-800"
+              >
+                View Listings
+              </a>
 
-        <p className="mt-6 max-w-2xl text-lg text-gray-600">
-          We help diaspora buyers discover listings, request due diligence,
-          inspect properties, and move toward safe transactions with confidence.
-        </p>
-
-        <div className="mt-8 flex flex-wrap gap-4">
-          <Link
-            href="/listings"
-            className="rounded-lg bg-black px-6 py-3 text-white"
-          >
-            View Listings
-          </Link>
-
-          <Link
-            href="/due-diligence"
-            className="rounded-lg border px-6 py-3"
-          >
-            Request Due Diligence
-          </Link>
+              <a
+                href="/contact"
+                className="rounded-xl border border-gray-300 px-6 py-3 font-semibold text-gray-800 hover:bg-gray-50"
+              >
+                Speak with Us
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-6xl gap-6 px-6 pb-16 md:grid-cols-3">
-        <div className="rounded-xl border p-6">
-          <h3 className="text-lg font-semibold">Verified Listings</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            Property data and media connected through your platform.
-          </p>
-        </div>
+      {/* Why Choose Us */}
+      <section className="px-6 py-16">
+        <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-3">
+          <div className="rounded-2xl border border-gray-200 p-6 shadow-sm">
+            <h2 className="text-xl font-bold">Property Guidance</h2>
+            <p className="mt-3 text-sm leading-7 text-gray-600">
+              Understand property types, locations, risks, and buying steps
+              before making any payment.
+            </p>
+          </div>
 
-        <div className="rounded-xl border p-6">
-          <h3 className="text-lg font-semibold">Inspection Requests</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            Buyers can request due diligence directly from the property page.
-          </p>
-        </div>
+          <div className="rounded-2xl border border-gray-200 p-6 shadow-sm">
+            <h2 className="text-xl font-bold">Due Diligence Support</h2>
+            <p className="mt-3 text-sm leading-7 text-gray-600">
+              Learn what to verify, which documents matter, and how to reduce
+              risk before traveling or investing.
+            </p>
+          </div>
 
-        <div className="rounded-xl border p-6">
-          <h3 className="text-lg font-semibold">Admin Control</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            Manage uploads, requests, and listings from your dashboard.
+          <div className="rounded-2xl border border-gray-200 p-6 shadow-sm">
+            <h2 className="text-xl font-bold">Smart Property Insight</h2>
+            <p className="mt-3 text-sm leading-7 text-gray-600">
+              Ask questions about solar systems, smart homes, infrastructure,
+              estate living, and long-term investment potential.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* AI Assistant Section */}
+      <section className="bg-gray-50 px-6 py-16">
+        <div className="mx-auto max-w-4xl">
+          <PropertyAssistant />
+        </div>
+      </section>
+
+      {/* Footer CTA */}
+      <section className="px-6 py-16">
+        <div className="mx-auto max-w-5xl rounded-3xl bg-green-700 p-10 text-white">
+          <h2 className="text-3xl font-bold">
+            Planning a trip to Nigeria for property inspection?
+          </h2>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-green-50">
+            Start asking questions now so you can travel with more clarity,
+            better preparation, and reduced risk.
           </p>
+
+          <div className="mt-6">
+            <a
+              href="/contact"
+              className="inline-block rounded-xl bg-white px-6 py-3 font-semibold text-green-800 hover:bg-green-50"
+            >
+              Contact Us
+            </a>
+          </div>
         </div>
       </section>
     </main>

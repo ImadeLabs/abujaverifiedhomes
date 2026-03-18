@@ -1,99 +1,192 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { sendPropertyToZapier } from "@/lib/zapier";
 
 type UploadClientProps = {
-  propertyId?: string;
+  propertyId: string;
+};
+
+type PropertyRecord = {
+  id: string;
+  title: string;
+  price: number;
+  location: string;
+  property_type: string | null;
+  status: string | null;
+  featured_image: string | null;
 };
 
 export default function UploadClient({ propertyId }: UploadClientProps) {
-  const [mounted, setMounted] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
+  const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [feedback, setFeedback] = useState("");
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const selectedFiles = Array.from(e.target.files || []);
+    setFiles(selectedFiles);
+  }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.[0]) return;
-    setFile(e.target.files[0]);
-  };
-
-  const handleUpload = async () => {
-    if (!file) {
-      alert("Please select an image first");
+  async function handleUpload() {
+    if (!propertyId) {
+      setFeedback("Missing property ID.");
       return;
     }
 
-    if (!propertyId) {
-      alert("Missing propertyId in URL");
+    if (files.length === 0) {
+      setFeedback("Please select at least one image.");
       return;
     }
 
     setUploading(true);
+    setFeedback("");
 
-    const fileName = `${Date.now()}-${file.name}`;
-    const filePath = `properties/${propertyId}/${fileName}`;
+    try {
+      let firstUploadedImageUrl = "";
 
-    const { error: uploadError } = await supabase.storage
-      .from("property-media")
-      .upload(filePath, file);
+      for (let index = 0; index < files.length; index++) {
+        const file = files[index];
+        const fileExt = file.name.split(".").pop() || "jpg";
+        const fileName = `${propertyId}/${Date.now()}-${Math.random()
+          .toString(36)
+          .slice(2)}.${fileExt}`;
 
-    if (uploadError) {
-      alert("Upload failed");
-      console.log(uploadError);
+        const { error: uploadError } = await supabase.storage
+          .from("property-media")
+          .upload(fileName, file, {
+            cacheControl: "3600",
+            upsert: false,
+            contentType: file.type,
+          });
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        const { data: publicUrlData } = supabase.storage
+          .from("property-media")
+          .getPublicUrl(fileName);
+
+        const fileUrl = publicUrlData.publicUrl;
+
+        if (!firstUploadedImageUrl) {
+          firstUploadedImageUrl = fileUrl;
+        }
+
+        const { error: dbError } = await supabase.from("property_media").insert([
+          {
+            property_id: propertyId,
+            file_url: fileUrl,
+            media_type: "image",
+          },
+        ]);
+
+        if (dbError) {
+          throw dbError;
+        }
+      }
+
+      if (firstUploadedImageUrl) {
+        const { error: updateFeaturedError } = await supabase
+          .from("properties")
+          .update({ featured_image: firstUploadedImageUrl })
+          .eq("id", propertyId);
+
+        if (updateFeaturedError) {
+          throw updateFeaturedError;
+        }
+      }
+
+      const { data: property, error: propertyError } = await supabase
+        .from("properties")
+        .select("id, title, price, location, property_type, status, featured_image")
+        .eq("id", propertyId)
+        .single<PropertyRecord>();
+
+      if (propertyError) {
+        throw propertyError;
+      }
+
+      await sendPropertyToZapier({
+        id: property.id,
+        title: property.title,
+        price: property.price,
+        location: property.location,
+        property_type: property.property_type,
+        featured_image: property.featured_image,
+        status: property.status,
+      });
+
+      setFeedback("Images uploaded successfully.");
+      setFiles([]);
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      setTimeout(() => {
+        router.push(`/admin/properties/${propertyId}`);
+      }, 1000);
+    } catch (error: unknown) {
+      console.error("UPLOAD ERROR:", error);
+
+      if (typeof error === "object" && error !== null && "message" in error) {
+        setFeedback(
+          String((error as { message?: string }).message || "Upload failed.")
+        );
+      } else {
+        setFeedback("Upload failed.");
+      }
+    } finally {
       setUploading(false);
-      return;
     }
-
-    const { data } = supabase.storage
-      .from("property-media")
-      .getPublicUrl(filePath);
-
-    const imageUrl = data.publicUrl;
-
-    const { error: insertError } = await supabase.from("property_media").insert({
-      property_id: propertyId,
-      media_type: "image",
-      url: imageUrl,
-    });
-
-    if (insertError) {
-      alert("Image uploaded, but database save failed");
-      console.log(insertError);
-      setUploading(false);
-      return;
-    }
-
-    alert("Image uploaded successfully!");
-    setUploading(false);
-    setFile(null);
-  };
-
-  if (!mounted) {
-    return <div>Loading...</div>;
   }
 
   return (
-    <>
-      <h1 className="text-3xl font-bold mb-6">Upload Property Image</h1>
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h1 className="mb-4 text-2xl font-bold text-green-800">
+        Upload Property Images
+      </h1>
 
-      <p className="mb-4 text-sm text-gray-600">
-        Property ID: {propertyId ?? "Not found"}
+      <p className="mb-4 text-sm text-slate-600">
+        Property ID: {propertyId || "Not found"}
       </p>
 
-      <input type="file" onChange={handleFileChange} className="mb-4" />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        onChange={handleFileChange}
+        disabled={uploading}
+        className="mb-4 block w-full rounded-lg border border-slate-300 p-3"
+      />
+
+      {files.length > 0 && (
+        <div className="mb-4">
+          <p className="mb-2 font-medium text-slate-800">Selected files:</p>
+          <ul className="space-y-1 text-sm text-slate-600">
+            {files.map((file, index) => (
+              <li key={`${file.name}-${index}`}>{file.name}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <button
-        type="button"
         onClick={handleUpload}
-        className="bg-black text-white px-6 py-3 rounded"
         disabled={uploading}
+        className="rounded-xl bg-green-700 px-6 py-3 font-semibold text-white transition hover:bg-green-800 disabled:opacity-60"
       >
-        {uploading ? "Uploading..." : "Upload Image"}
+        {uploading ? "Uploading..." : "Upload Images"}
       </button>
-    </>
+
+      {feedback && <p className="mt-4 text-sm text-slate-700">{feedback}</p>}
+    </div>
   );
 }

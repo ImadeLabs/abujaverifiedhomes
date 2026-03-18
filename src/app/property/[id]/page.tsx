@@ -4,47 +4,57 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 
-export default function PropertyPage({ params }: any) {
+export default function PropertyPage({ params }: { params: { id: string } }) {
   const [images, setImages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchImages();
   }, [params.id]);
 
   async function fetchImages() {
+    setLoading(true);
+
     const { data, error } = await supabase
       .from("property_media")
       .select("*")
-      .eq("property_id", params.id);
+      .eq("property_id", params.id)
+      .order("created_at", { ascending: false });
 
     if (error) {
-      console.log(error);
+      console.log("Error loading images:", error);
+      setLoading(false);
       return;
     }
 
     setImages(data || []);
+    setLoading(false);
   }
 
   return (
-    <main className="p-10 max-w-5xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Property Images</h1>
+    <main className="mx-auto max-w-5xl p-10">
+      <h1 className="mb-6 text-3xl font-bold">Property Images</h1>
 
-      {/* Upload Button */}
       <Link
         href={`/upload?propertyId=${params.id}`}
-        className="inline-block mb-6 rounded-lg bg-black px-6 py-3 text-white"
+        className="mb-6 inline-block rounded-lg bg-black px-6 py-3 text-white"
       >
         Upload Image
       </Link>
 
-      {/* Image Grid */}
-      <div className="grid grid-cols-3 gap-4">
+      {loading && <p className="text-gray-500">Loading images...</p>}
+
+      {!loading && images.length === 0 && (
+        <p className="text-gray-500">No images uploaded yet.</p>
+      )}
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {images.map((img) => (
           <img
             key={img.id}
-            src={img.url}
+            src={img.file_url || img.url}
             className="rounded-lg shadow"
-            alt="Property image"
+            alt="Property"
           />
         ))}
       </div>
