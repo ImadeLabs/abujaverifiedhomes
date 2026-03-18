@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { supabase } from "@/lib/supabase";
 
 export default function DueDiligenceClient() {
   const searchParams = useSearchParams();
@@ -10,11 +9,13 @@ export default function DueDiligenceClient() {
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setSuccess("");
+    setErrorMessage("");
 
     const form = e.currentTarget;
 
@@ -22,21 +23,31 @@ export default function DueDiligenceClient() {
       name: (form.elements.namedItem("name") as HTMLInputElement).value,
       email: (form.elements.namedItem("email") as HTMLInputElement).value,
       phone: (form.elements.namedItem("phone") as HTMLInputElement).value,
-      property_id: propertyId,
+      propertyId,
       notes: (form.elements.namedItem("notes") as HTMLTextAreaElement).value,
     };
 
-    const { error } = await supabase.from("due_diligence").insert(payload);
+    try {
+      const res = await fetch("/api/due-diligence", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
-    if (error) {
-      alert("Error submitting request");
-      console.log(error);
-    } else {
+      if (!res.ok) {
+        throw new Error("Failed to submit request");
+      }
+
       setSuccess("Inspection request submitted successfully!");
       form.reset();
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("Error submitting request.");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
   return (
@@ -48,7 +59,7 @@ export default function DueDiligenceClient() {
           name="name"
           type="text"
           placeholder="Full Name"
-          className="border p-3 w-full"
+          className="w-full border p-3"
           required
         />
 
@@ -56,7 +67,7 @@ export default function DueDiligenceClient() {
           name="email"
           type="email"
           placeholder="Email Address"
-          className="border p-3 w-full"
+          className="w-full border p-3"
           required
         />
 
@@ -64,25 +75,26 @@ export default function DueDiligenceClient() {
           name="phone"
           type="tel"
           placeholder="Phone Number"
-          className="border p-3 w-full"
+          className="w-full border p-3"
         />
 
         <textarea
           name="notes"
           placeholder="Extra inspection notes"
-          className="border p-3 w-full"
+          className="w-full border p-3"
         />
 
         <button
           type="submit"
           disabled={loading}
-          className="bg-black text-white px-6 py-3 rounded"
+          className="rounded bg-black px-6 py-3 text-white"
         >
           {loading ? "Submitting..." : "Submit Inspection Request"}
         </button>
       </form>
 
       {success && <p className="mt-4 text-green-600">{success}</p>}
+      {errorMessage && <p className="mt-4 text-red-600">{errorMessage}</p>}
     </>
   );
 }

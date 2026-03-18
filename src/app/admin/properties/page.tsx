@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
 
 type Property = {
   id: string;
@@ -10,13 +9,13 @@ type Property = {
   price: number;
   area: string | null;
   city: string | null;
-  listing_type: "sale" | "rent";
-  property_type: string | null;
+  listingType: "sale" | "rent";
+  propertyType: string | null;
   verified: boolean;
   featured: boolean;
   status: "draft" | "published" | "sold" | "rented" | "hidden";
-  cover_image_url: string | null;
-  created_at: string;
+  coverImageUrl: string | null;
+  createdAt: string;
 };
 
 function formatPrice(price: number, listingType: string) {
@@ -39,23 +38,26 @@ export default function AdminPropertiesPage() {
   }, []);
 
   async function fetchProperties() {
-    setLoading(true);
-    setFeedback("");
+    try {
+      setLoading(true);
+      setFeedback("");
 
-    const { data, error } = await supabase
-      .from("properties")
-      .select("*")
-      .order("created_at", { ascending: false });
+      const res = await fetch("/api/properties", {
+        cache: "no-store",
+      });
 
-    if (error) {
+      if (!res.ok) {
+        throw new Error("Failed to fetch properties");
+      }
+
+      const data = await res.json();
+      setProperties(data);
+    } catch (error) {
       console.error(error);
       setFeedback("Failed to load properties.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setProperties((data || []) as Property[]);
-    setLoading(false);
   }
 
   async function handleDelete(propertyId: string) {
@@ -64,21 +66,23 @@ export default function AdminPropertiesPage() {
     );
     if (!confirmed) return;
 
-    setFeedback("");
+    try {
+      setFeedback("");
 
-    const { error } = await supabase
-      .from("properties")
-      .delete()
-      .eq("id", propertyId);
+      const res = await fetch(`/api/properties/${propertyId}`, {
+        method: "DELETE",
+      });
 
-    if (error) {
+      if (!res.ok) {
+        throw new Error("Failed to delete property");
+      }
+
+      setProperties((prev) => prev.filter((item) => item.id !== propertyId));
+      setFeedback("Property deleted successfully.");
+    } catch (error) {
       console.error(error);
       setFeedback("Failed to delete property.");
-      return;
     }
-
-    setProperties((prev) => prev.filter((item) => item.id !== propertyId));
-    setFeedback("Property deleted successfully.");
   }
 
   return (
@@ -128,7 +132,7 @@ export default function AdminPropertiesPage() {
             >
               <img
                 src={
-                  property.cover_image_url ||
+                  property.coverImageUrl ||
                   "https://placehold.co/800x500?text=No+Image"
                 }
                 alt={property.title}
@@ -138,7 +142,7 @@ export default function AdminPropertiesPage() {
               <div className="space-y-4 p-5">
                 <div className="flex flex-wrap gap-2">
                   <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-                    {property.listing_type === "rent" ? "For Rent" : "For Sale"}
+                    {property.listingType === "rent" ? "For Rent" : "For Sale"}
                   </span>
 
                   <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
@@ -163,13 +167,13 @@ export default function AdminPropertiesPage() {
                     {property.title}
                   </h2>
                   <p className="mt-1 text-lg font-semibold text-slate-900">
-                    {formatPrice(property.price, property.listing_type)}
+                    {formatPrice(property.price, property.listingType)}
                   </p>
                   <p className="mt-1 text-sm text-slate-600">
                     {property.area || "No area"}, {property.city || "Abuja"}
                   </p>
                   <p className="mt-1 text-sm text-slate-500">
-                    {property.property_type || "Property"}
+                    {property.propertyType || "Property"}
                   </p>
                 </div>
 
