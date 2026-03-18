@@ -10,6 +10,7 @@ type Property = {
   featured: boolean;
   status: string;
   coverImageUrl: string | null;
+  description: string | null;
 };
 
 function formatPrice(price: number, listingType: string) {
@@ -23,7 +24,8 @@ function formatPrice(price: number, listingType: string) {
 }
 
 async function getProperties(): Promise<Property[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
   const res = await fetch(`${baseUrl}/api/properties`, {
     cache: "no-store",
@@ -36,7 +38,7 @@ async function getProperties(): Promise<Property[]> {
   return res.json();
 }
 
-export default async function ListingsPage() {
+export default async function PropertiesPage() {
   const properties = await getProperties();
 
   return (
@@ -103,6 +105,9 @@ export default async function ListingsPage() {
                   </p>
                   <p className="mt-1 text-sm text-slate-500">
                     {property.propertyType || "Property"}
+                  </p>
+                  <p className="mt-2 text-sm text-slate-600">
+                    {property.description || "No description available."}
                   </p>
                 </div>
 

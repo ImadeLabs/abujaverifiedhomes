@@ -28,7 +28,18 @@ export async function POST(req: Request) {
         name: body.name,
         email: body.email,
         phone: body.phone || null,
-        propertyId: body.propertyId || null,
+
+        requestType: body.requestType || "internal",
+        propertyId: body.requestType === "internal" ? body.propertyId || null : null,
+        externalPropertyUrl:
+          body.requestType === "external" ? body.externalPropertyUrl || null : null,
+        externalPropertyAddress:
+          body.requestType === "external" ? body.externalPropertyAddress || null : null,
+        externalAgentPhone:
+          body.requestType === "external" ? body.externalAgentPhone || null : null,
+        sourcePlatform:
+          body.requestType === "external" ? body.sourcePlatform || null : null,
+
         notes: body.notes || null,
       },
     });

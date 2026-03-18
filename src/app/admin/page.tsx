@@ -7,7 +7,12 @@ type DueDiligenceRequest = {
   name: string;
   email: string;
   phone: string | null;
+  requestType: string;
   propertyId: string | null;
+  externalPropertyUrl: string | null;
+  externalPropertyAddress: string | null;
+  externalAgentPhone: string | null;
+  sourcePlatform: string | null;
   notes: string | null;
   adminNote: string | null;
   status: string;
@@ -85,16 +90,60 @@ export default function AdminPage() {
           {requests.map((req) => (
             <div key={req.id} className="rounded-xl border p-5 shadow-sm">
               <div className="grid gap-2 md:grid-cols-2">
-                <p><strong>Name:</strong> {req.name}</p>
-                <p><strong>Email:</strong> {req.email}</p>
-                <p><strong>Phone:</strong> {req.phone || "-"}</p>
-                <p><strong>Property:</strong> {req.propertyId || "-"}</p>
-                <p><strong>Status:</strong> {req.status}</p>
-                <p><strong>Date:</strong> {new Date(req.createdAt).toLocaleString()}</p>
+                <p>
+                  <strong>Name:</strong> {req.name}
+                </p>
+                <p>
+                  <strong>Email:</strong> {req.email}
+                </p>
+                <p>
+                  <strong>Phone:</strong> {req.phone || "-"}
+                </p>
+                <p>
+                  <strong>Request Type:</strong> {req.requestType}
+                </p>
+                <p>
+                  <strong>Status:</strong> {req.status}
+                </p>
+                <p>
+                  <strong>Date:</strong>{" "}
+                  {new Date(req.createdAt).toLocaleString()}
+                </p>
               </div>
 
+              {req.requestType === "internal" && (
+                <div className="mt-3">
+                  <p>
+                    <strong>Internal Property ID:</strong> {req.propertyId || "-"}
+                  </p>
+                </div>
+              )}
+
+              {req.requestType === "external" && (
+                <div className="mt-3 space-y-1 rounded border bg-slate-50 p-4">
+                  <p>
+                    <strong>External Property URL:</strong>{" "}
+                    {req.externalPropertyUrl || "-"}
+                  </p>
+                  <p>
+                    <strong>External Address:</strong>{" "}
+                    {req.externalPropertyAddress || "-"}
+                  </p>
+                  <p>
+                    <strong>Agent/Seller Phone:</strong>{" "}
+                    {req.externalAgentPhone || "-"}
+                  </p>
+                  <p>
+                    <strong>Source Platform:</strong>{" "}
+                    {req.sourcePlatform || "-"}
+                  </p>
+                </div>
+              )}
+
               <div className="mt-3">
-                <p><strong>Client Note:</strong> {req.notes || "-"}</p>
+                <p>
+                  <strong>Client Note:</strong> {req.notes || "-"}
+                </p>
               </div>
 
               <div className="mt-4 space-y-3">
