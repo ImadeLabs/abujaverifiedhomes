@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Property {
+  id            String   @id @default(cuid())
+  title         String
+  price         Float
+  area          String?
+  city          String?
+  listingType   String
+  propertyType  String?
+  verified      Boolean  @default(false)
+  featured      Boolean  @default(false)
+  status        String   @default("draft")
+  coverImageUrl String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model DueDiligence {
+  id         String   @id @default(cuid())
+  name       String
+  email      String
+  phone      String?
+  propertyId String?
+  notes      String?
+  adminNote  String?
+  status     String   @default("pending")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
