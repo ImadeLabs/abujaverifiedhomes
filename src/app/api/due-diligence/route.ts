@@ -30,13 +30,20 @@ export async function POST(req: Request) {
         phone: body.phone || null,
 
         requestType: body.requestType || "internal",
-        propertyId: body.requestType === "internal" ? body.propertyId || null : null,
+        propertyId:
+          body.requestType === "internal" ? body.propertyId || null : null,
         externalPropertyUrl:
-          body.requestType === "external" ? body.externalPropertyUrl || null : null,
+          body.requestType === "external"
+            ? body.externalPropertyUrl || null
+            : null,
         externalPropertyAddress:
-          body.requestType === "external" ? body.externalPropertyAddress || null : null,
+          body.requestType === "external"
+            ? body.externalPropertyAddress || null
+            : null,
         externalAgentPhone:
-          body.requestType === "external" ? body.externalAgentPhone || null : null,
+          body.requestType === "external"
+            ? body.externalAgentPhone || null
+            : null,
         sourcePlatform:
           body.requestType === "external" ? body.sourcePlatform || null : null,
 
@@ -49,6 +56,29 @@ export async function POST(req: Request) {
     console.error("POST /api/due-diligence error:", error);
     return NextResponse.json(
       { error: "Failed to submit due diligence request" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(req: Request) {
+  try {
+    const body = await req.json();
+    const { id, status, adminNote } = body;
+
+    const updated = await prisma.dueDiligence.update({
+      where: { id },
+      data: {
+        status,
+        adminNote,
+      },
+    });
+
+    return NextResponse.json(updated);
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "Failed to update request" },
       { status: 500 }
     );
   }

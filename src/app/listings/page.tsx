@@ -106,14 +106,21 @@ export default async function ListingsPage() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <a
-                    href={`/due-diligence?propertyId=${property.id}`}
-                    className="rounded-lg bg-black px-4 py-3 text-center text-sm font-medium text-white hover:opacity-90"
-                  >
-                    Request Verification / Due Diligence
-                  </a>
-                </div>
+              href={`/properties/${property.id}`}
+    className="rounded-lg border px-4 py-3 text-center text-sm font-medium text-slate-700 hover:bg-slate-50"
+  >
+    View Details
+  </a>
+
+  <a
+    href={`/due-diligence?propertyId=${property.id}`}
+    className="rounded-lg bg-black px-4 py-3 text-center text-sm font-medium text-white hover:opacity-90"
+  >
+    Request Verification
+  </a>
+</div>
 
                 <div className="border-t pt-3 text-xs text-slate-500">
                   Listing ID: {property.id}
