@@ -9,6 +9,9 @@ type DueDiligenceRequest = {
   phone: string | null;
   requestType: string;
   propertyId: string | null;
+  propertyTitle: string | null;
+  propertyArea: string | null;
+  propertyCity: string | null;
   externalPropertyUrl: string | null;
   externalPropertyAddress: string | null;
   externalAgentPhone: string | null;
@@ -148,10 +151,19 @@ export default function AdminPage() {
               </div>
 
               {req.requestType === "internal" && (
-                <div className="mt-3">
+                <div className="mt-3 rounded border bg-slate-50 p-4 space-y-1">
                   <p>
                     <strong>Internal Property ID:</strong>{" "}
                     {req.propertyId || "-"}
+                  </p>
+                  <p>
+                    <strong>Property Title:</strong> {req.propertyTitle || "-"}
+                  </p>
+                  <p>
+                    <strong>Property Area:</strong> {req.propertyArea || "-"}
+                  </p>
+                  <p>
+                    <strong>Property City:</strong> {req.propertyCity || "-"}
                   </p>
                 </div>
               )}

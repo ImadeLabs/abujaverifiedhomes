@@ -31,7 +31,8 @@ export default function DueDiligenceClient() {
       propertyId:
         requestType === "internal"
           ? propertyIdFromUrl ||
-            (form.elements.namedItem("propertyId") as HTMLInputElement)?.value ||
+            (form.elements.namedItem("propertyId") as HTMLInputElement)
+              ?.value ||
             null
           : null,
 
@@ -171,7 +172,11 @@ export default function DueDiligenceClient() {
 
         {requestType === "internal" && propertyIdFromUrl && (
           <div className="rounded border bg-green-50 p-3 text-sm text-green-700">
-            Property reference detected: <strong>{propertyIdFromUrl}</strong>
+            You are requesting verification for a property listed on Abuja
+            Verified Homes.
+            <div className="mt-1">
+              Property reference: <strong>{propertyIdFromUrl}</strong>
+            </div>
           </div>
         )}
 

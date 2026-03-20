@@ -30,6 +30,9 @@ model DueDiligence {
   phone                   String?
   requestType             String   @default("internal")
   propertyId              String?
+  propertyTitle           String?
+  propertyArea            String?
+  propertyCity            String?
   externalPropertyUrl     String?
   externalPropertyAddress String?
   externalAgentPhone      String?
