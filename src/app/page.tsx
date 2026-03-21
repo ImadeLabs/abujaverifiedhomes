@@ -12,7 +12,7 @@ export default function HomePage() {
             </p>
 
             <h1 className="text-4xl font-bold leading-tight md:text-6xl">
-              Buy Property in Abuja with More Confidence
+              Verify listings, request due diligence, and make safer property decisions in Abuja, Nigeria— before you pay.
             </h1>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-600">

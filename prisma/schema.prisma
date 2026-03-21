@@ -16,21 +16,30 @@ model Property {
   propertyType  String?
   verified      Boolean  @default(false)
   featured      Boolean  @default(false)
-  status        String   @default("draft")
+  status        String   @default("published")
   coverImageUrl String?
+  description   String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
 
 model DueDiligence {
-  id         String   @id @default(cuid())
-  name       String
-  email      String
-  phone      String?
-  propertyId String?
-  notes      String?
-  adminNote  String?
-  status     String   @default("pending")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id                      String   @id @default(cuid())
+  name                    String
+  email                   String
+  phone                   String?
+  requestType             String   @default("internal")
+  propertyId              String?
+  propertyTitle           String?
+  propertyArea            String?
+  propertyCity            String?
+  externalPropertyUrl     String?
+  externalPropertyAddress String?
+  externalAgentPhone      String?
+  sourcePlatform          String?
+  notes                   String?
+  adminNote               String?
+  status                  String   @default("pending")
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
 }

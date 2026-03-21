@@ -1,13 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 type DueDiligenceRequest = {
   id: string;
   name: string;
   email: string;
   phone: string | null;
+  requestType: string;
   propertyId: string | null;
+  propertyTitle: string | null;
+  propertyArea: string | null;
+  propertyCity: string | null;
+  externalPropertyUrl: string | null;
+  externalPropertyAddress: string | null;
+  externalAgentPhone: string | null;
+  sourcePlatform: string | null;
   notes: string | null;
   adminNote: string | null;
   status: string;
@@ -37,29 +46,25 @@ export default function AdminPage() {
     }
   }
 
-  async function updateRequest(
-    id: string,
-    status: string,
-    adminNote: string
-  ) {
+  async function updateStatus(id: string, status: string, adminNote?: string) {
     try {
-      const res = await fetch(`/api/due-diligence/${id}`, {
+      const res = await fetch("/api/due-diligence", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ status, adminNote }),
+        body: JSON.stringify({
+          id,
+          status,
+          adminNote: adminNote || "",
+        }),
       });
 
       if (!res.ok) {
         throw new Error("Failed to update request");
       }
 
-      setRequests((prev) =>
-        prev.map((item) =>
-          item.id === id ? { ...item, status, adminNote } : item
-        )
-      );
+      fetchRequests();
     } catch (error) {
       console.error("Error updating request:", error);
       alert("Failed to update request");
@@ -70,9 +75,58 @@ export default function AdminPage() {
     fetchRequests();
   }, []);
 
+  function statusBadge(status: string) {
+    if (status === "approved") {
+      return (
+        <span className="rounded bg-green-100 px-2 py-1 text-xs font-semibold text-green-700">
+          approved
+        </span>
+      );
+    }
+
+    if (status === "rejected") {
+      return (
+        <span className="rounded bg-red-100 px-2 py-1 text-xs font-semibold text-red-700">
+          rejected
+        </span>
+      );
+    }
+
+    if (status === "completed") {
+      return (
+        <span className="rounded bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-700">
+          completed
+        </span>
+      );
+    }
+
+    if (status === "in_review") {
+      return (
+        <span className="rounded bg-yellow-100 px-2 py-1 text-xs font-semibold text-yellow-700">
+          in_review
+        </span>
+      );
+    }
+
+    return (
+      <span className="rounded bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-700">
+        pending
+      </span>
+    );
+  }
+
   return (
     <main className="p-10">
-      <h1 className="mb-6 text-3xl font-bold">Admin Dashboard</h1>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+
+        <Link
+          href="/admin/properties/new"
+          className="rounded-lg bg-black px-4 py-2 text-white"
+        >
+          Add New Property
+        </Link>
+      </div>
 
       {loading && <p>Loading inspection requests...</p>}
 
@@ -85,70 +139,139 @@ export default function AdminPage() {
           {requests.map((req) => (
             <div key={req.id} className="rounded-xl border p-5 shadow-sm">
               <div className="grid gap-2 md:grid-cols-2">
-                <p><strong>Name:</strong> {req.name}</p>
-                <p><strong>Email:</strong> {req.email}</p>
-                <p><strong>Phone:</strong> {req.phone || "-"}</p>
-                <p><strong>Property:</strong> {req.propertyId || "-"}</p>
-                <p><strong>Status:</strong> {req.status}</p>
-                <p><strong>Date:</strong> {new Date(req.createdAt).toLocaleString()}</p>
+                <p>
+                  <strong>Name:</strong> {req.name}
+                </p>
+                <p>
+                  <strong>Email:</strong> {req.email}
+                </p>
+                <p>
+                  <strong>Phone:</strong> {req.phone || "-"}
+                </p>
+                <p>
+                  <strong>Request Type:</strong> {req.requestType}
+                </p>
+                <p>
+                  <strong>Status:</strong> {statusBadge(req.status)}
+                </p>
+                <p>
+                  <strong>Date:</strong>{" "}
+                  {new Date(req.createdAt).toLocaleString()}
+                </p>
               </div>
+
+              {req.requestType === "internal" && (
+                <div className="mt-3 rounded border bg-slate-50 p-4 space-y-1">
+                  <p>
+                    <strong>Internal Property ID:</strong>{" "}
+                    {req.propertyId || "-"}
+                  </p>
+                  <p>
+                    <strong>Property Title:</strong> {req.propertyTitle || "-"}
+                  </p>
+                  <p>
+                    <strong>Property Area:</strong> {req.propertyArea || "-"}
+                  </p>
+                  <p>
+                    <strong>Property City:</strong> {req.propertyCity || "-"}
+                  </p>
+                </div>
+              )}
+
+              {req.requestType === "external" && (
+                <div className="mt-3 space-y-1 rounded border bg-slate-50 p-4">
+                  <p>
+                    <strong>External Property URL:</strong>{" "}
+                    {req.externalPropertyUrl || "-"}
+                  </p>
+                  <p>
+                    <strong>External Address:</strong>{" "}
+                    {req.externalPropertyAddress || "-"}
+                  </p>
+                  <p>
+                    <strong>Agent/Seller Phone:</strong>{" "}
+                    {req.externalAgentPhone || "-"}
+                  </p>
+                  <p>
+                    <strong>Source Platform:</strong>{" "}
+                    {req.sourcePlatform || "-"}
+                  </p>
+                </div>
+              )}
 
               <div className="mt-3">
-                <p><strong>Client Note:</strong> {req.notes || "-"}</p>
+                <p>
+                  <strong>Client Note:</strong> {req.notes || "-"}
+                </p>
               </div>
 
-              <div className="mt-4 space-y-3">
-                <select
-                  value={req.status}
-                  onChange={(e) =>
-                    updateRequest(req.id, e.target.value, req.adminNote || "")
-                  }
-                  className="rounded border p-2"
-                >
-                  <option value="pending">Pending</option>
-                  <option value="in_review">In Review</option>
-                  <option value="approved">Approved</option>
-                  <option value="rejected">Rejected</option>
-                  <option value="completed">Completed</option>
-                </select>
-
+              <div className="mt-4">
                 <textarea
                   defaultValue={req.adminNote || ""}
                   placeholder="Admin internal note"
                   className="w-full rounded border p-3"
                   onBlur={(e) =>
-                    updateRequest(req.id, req.status, e.target.value)
+                    updateStatus(req.id, req.status, e.target.value)
                   }
                 />
+              </div>
 
-                <div className="flex gap-3">
-                  <button
-                    onClick={() =>
-                      updateRequest(req.id, "approved", req.adminNote || "")
-                    }
-                    className="rounded bg-green-600 px-4 py-2 text-white"
-                  >
-                    Approve
-                  </button>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <button
+                  onClick={() =>
+                    updateStatus(req.id, "approved", req.adminNote || "")
+                  }
+                  className="rounded bg-green-600 px-4 py-2 text-white"
+                >
+                  Approve
+                </button>
 
-                  <button
-                    onClick={() =>
-                      updateRequest(req.id, "rejected", req.adminNote || "")
-                    }
-                    className="rounded bg-red-600 px-4 py-2 text-white"
-                  >
-                    Reject
-                  </button>
+                <button
+                  onClick={() =>
+                    updateStatus(req.id, "rejected", req.adminNote || "")
+                  }
+                  className="rounded bg-red-600 px-4 py-2 text-white"
+                >
+                  Reject
+                </button>
 
-                  <button
-                    onClick={() =>
-                      updateRequest(req.id, "in_review", req.adminNote || "")
-                    }
-                    className="rounded bg-yellow-500 px-4 py-2 text-white"
+                <button
+                  onClick={() =>
+                    updateStatus(req.id, "in_review", req.adminNote || "")
+                  }
+                  className="rounded bg-yellow-500 px-4 py-2 text-white"
+                >
+                  In Review
+                </button>
+
+                <button
+                  onClick={() =>
+                    updateStatus(req.id, "completed", req.adminNote || "")
+                  }
+                  className="rounded bg-blue-600 px-4 py-2 text-white"
+                >
+                  Completed
+                </button>
+
+                {req.email && (
+                  <a
+                    href={`mailto:${req.email}`}
+                    className="rounded border px-4 py-2 text-sm font-medium text-slate-700"
                   >
-                    Mark In Review
-                  </button>
-                </div>
+                    Email Client
+                  </a>
+                )}
+
+                {req.phone && (
+                  <a
+                    href={`https://wa.me/${req.phone.replace(/\D/g, "")}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded border px-4 py-2 text-sm font-medium text-slate-700"
+                  >
+                    WhatsApp
+                  </a>
+                )}
               </div>
             </div>
           ))}

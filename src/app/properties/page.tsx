@@ -10,6 +10,7 @@ type Property = {
   featured: boolean;
   status: string;
   coverImageUrl: string | null;
+  description: string | null;
 };
 
 function formatPrice(price: number, listingType: string) {
@@ -23,7 +24,8 @@ function formatPrice(price: number, listingType: string) {
 }
 
 async function getProperties(): Promise<Property[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
   const res = await fetch(`${baseUrl}/api/properties`, {
     cache: "no-store",
@@ -36,7 +38,7 @@ async function getProperties(): Promise<Property[]> {
   return res.json();
 }
 
-export default async function ListingsPage() {
+export default async function PropertiesPage() {
   const properties = await getProperties();
 
   return (
@@ -104,23 +106,19 @@ export default async function ListingsPage() {
                   <p className="mt-1 text-sm text-slate-500">
                     {property.propertyType || "Property"}
                   </p>
+                  <p className="mt-2 text-sm text-slate-600">
+                    {property.description || "No description available."}
+                  </p>
                 </div>
 
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3">
                   <a
-              href={`/properties/${property.id}`}
-    className="rounded-lg border px-4 py-3 text-center text-sm font-medium text-slate-700 hover:bg-slate-50"
-  >
-    View Details
-  </a>
-
-  <a
-    href={`/due-diligence?propertyId=${property.id}`}
-    className="rounded-lg bg-black px-4 py-3 text-center text-sm font-medium text-white hover:opacity-90"
-  >
-    Request Verification
-  </a>
-</div>
+                    href={`/due-diligence?propertyId=${property.id}`}
+                    className="rounded-lg bg-black px-4 py-3 text-center text-sm font-medium text-white hover:opacity-90"
+                  >
+                    Request Verification / Due Diligence
+                  </a>
+                </div>
 
                 <div className="border-t pt-3 text-xs text-slate-500">
                   Listing ID: {property.id}

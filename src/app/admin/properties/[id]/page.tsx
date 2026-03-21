@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+
 
 type MediaItem = {
   id: string;
@@ -26,35 +26,41 @@ export default function PropertyMediaPage() {
     fetchImages();
   }, [propertyId]);
 
-async function fetchImages() {
-  setLoading(true);
-  setFeedback("");
+  async function fetchImages() {
+    setLoading(true);
+    setFeedback("");
 
-  try {
-    const { data, error, status, statusText } = await supabase
-      .from("property_media")
-      .select("*")
-      .eq("property_id", propertyId);
+    try {
+      const { data, error, status, statusText } = await supabase
+        .from("property_media")
+        .select("*")
+        .eq("property_id", propertyId);
 
-    console.log("MEDIA QUERY RESULT:", { data, error, status, statusText, propertyId });
+      console.log("MEDIA QUERY RESULT:", {
+        data,
+        error,
+        status,
+        statusText,
+        propertyId,
+      });
 
-    if (error) {
-      console.error("MEDIA LOAD ERROR:", error);
-      setFeedback(
-        `Failed to load images. Status: ${status} ${statusText || ""}`.trim()
-      );
+      if (error) {
+        console.error("MEDIA LOAD ERROR:", error);
+        setFeedback(
+          `Failed to load images. Status: ${status} ${statusText || ""}`.trim()
+        );
+        setLoading(false);
+        return;
+      }
+
+      setImages((data || []) as MediaItem[]);
+    } catch (err) {
+      console.error("MEDIA FETCH CRASH:", err);
+      setFeedback("Something went wrong while loading images.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setImages((data || []) as MediaItem[]);
-  } catch (err) {
-    console.error("MEDIA FETCH CRASH:", err);
-    setFeedback("Something went wrong while loading images.");
-  } finally {
-    setLoading(false);
   }
-}
 
   function extractStoragePath(url: string) {
     const marker = "/storage/v1/object/public/property-media/";
@@ -104,7 +110,9 @@ async function fetchImages() {
             <h1 className="text-3xl font-bold text-slate-900">
               Property Media Manager
             </h1>
-            <p className="mt-2 text-slate-600">Manage pictures for this listing.</p>
+            <p className="mt-2 text-slate-600">
+              Manage pictures for this listing.
+            </p>
           </div>
 
           <div className="flex flex-wrap gap-3">
@@ -155,7 +163,9 @@ async function fetchImages() {
               />
 
               <div className="space-y-3 p-4">
-                <p className="break-all text-xs text-slate-500">{img.file_url}</p>
+                <p className="break-all text-xs text-slate-500">
+                  {img.file_url}
+                </p>
 
                 <button
                   onClick={() => handleDelete(img.id, img.file_url)}
