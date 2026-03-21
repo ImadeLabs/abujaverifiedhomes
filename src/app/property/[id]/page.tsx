@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+
 
 export default function PropertyPage({ params }: { params: { id: string } }) {
   const [images, setImages] = useState<any[]>([]);

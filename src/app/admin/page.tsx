@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 type DueDiligenceRequest = {
   id: string;
@@ -116,7 +117,16 @@ export default function AdminPage() {
 
   return (
     <main className="p-10">
-      <h1 className="mb-6 text-3xl font-bold">Admin Dashboard</h1>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+
+        <Link
+          href="/admin/properties/new"
+          className="rounded-lg bg-black px-4 py-2 text-white"
+        >
+          Add New Property
+        </Link>
+      </div>
 
       {loading && <p>Loading inspection requests...</p>}
 

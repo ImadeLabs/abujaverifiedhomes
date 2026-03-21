@@ -1,3 +1,5 @@
+import PropertyAIReview from "./PropertyAIReview";
+
 type Property = {
   id: string;
   title: string;
@@ -53,7 +55,8 @@ export default async function PropertyDetailPage({
             Property not found
           </h1>
           <p className="mt-3 text-slate-600">
-            The property you are looking for does not exist or is no longer available.
+            The property you are looking for does not exist or is no longer
+            available.
           </p>
         </div>
       </main>
@@ -130,10 +133,19 @@ export default async function PropertyDetailPage({
               </h2>
               <p className="mt-3 text-slate-600">
                 Request due diligence to help confirm the property details,
-                inspect documentation, review location risk, and improve buyer confidence
-                before payment or commitment.
+                inspect documentation, review location risk, and improve buyer
+                confidence before payment or commitment.
               </p>
             </div>
+            <PropertyAIReview
+              title={property.title}
+              price={property.price}
+              area={property.area}
+              city={property.city}
+              listingType={property.listingType}
+              propertyType={property.propertyType}
+              verified={property.verified}
+            />
 
             <div className="flex flex-wrap gap-4">
               <a
